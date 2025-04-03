@@ -68,9 +68,9 @@ func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServ
 		return nil, err
 	}
 
-	serversResponse := HetznerRobotServersResponse{}
-	if err = json.Unmarshal(res, &serversResponse); err != nil {
+	var servers []HetznerRobotServer
+	if err = json.Unmarshal(res, &servers); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal servers response: %w", err)
 	}
-	return serversResponse.Server, nil
+	return servers, nil
 }
