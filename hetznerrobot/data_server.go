@@ -2,6 +2,7 @@ package hetznerrobot
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -305,6 +306,8 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("Unable to fetch servers:\n\t %q", err)
 	}
 
+	fmt.Printf("Processing %d servers for Terraform state\n", len(servers))
+
 	serverList := make([]map[string]interface{}, len(servers))
 	for i, server := range servers {
 		serverMap := map[string]interface{}{
@@ -333,9 +336,13 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		serverList[i] = serverMap
 	}
 
+	fmt.Printf("Setting %d servers in Terraform state\n", len(serverList))
 	if err := d.Set("servers", serverList); err != nil {
 		return diag.Errorf("Error setting servers: %s", err)
 	}
+
+	// Set a static ID since this is a data source
+	d.SetId("servers")
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
