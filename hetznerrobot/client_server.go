@@ -71,10 +71,33 @@ func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServ
 	// Debug: Print raw response
 	fmt.Printf("Raw API response: %s\n", string(res))
 
-	// Unmarshal directly into a slice of servers since the API returns an array
+	// First unmarshal into a generic interface to see the structure
+	var rawResponse interface{}
+	if err = json.Unmarshal(res, &rawResponse); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal raw response: %w", err)
+	}
+
+	// Debug: Print the structure
+	fmt.Printf("Response structure: %+v\n", rawResponse)
+
+	// Try to convert the raw response to our server structs
 	var servers []HetznerRobotServer
-	if err = json.Unmarshal(res, &servers); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal servers response: %w", err)
+	switch v := rawResponse.(type) {
+	case []interface{}:
+		// If it's an array, try to convert each element
+		servers = make([]HetznerRobotServer, len(v))
+		for i, item := range v {
+			// Convert each item to JSON and then to our struct
+			itemBytes, err := json.Marshal(item)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal server item: %w", err)
+			}
+			if err = json.Unmarshal(itemBytes, &servers[i]); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal server item: %w", err)
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unexpected response type: %T", v)
 	}
 
 	// Debug: Print number of servers found and their details
