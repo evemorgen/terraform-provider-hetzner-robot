@@ -46,7 +46,7 @@ type HetznerRobotServerRenameRequestBody struct {
 }
 
 type HetznerRobotServersResponse struct {
-	Servers []HetznerRobotServer `json:"server"`
+	Server []HetznerRobotServer `json:"server"`
 }
 
 func (c *HetznerRobotClient) getServer(ctx context.Context, serverNumber int) (*HetznerRobotServer, error) {
@@ -70,7 +70,7 @@ func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServ
 
 	serversResponse := HetznerRobotServersResponse{}
 	if err = json.Unmarshal(res, &serversResponse); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal servers response: %w", err)
 	}
-	return serversResponse.Servers, nil
+	return serversResponse.Server, nil
 }
