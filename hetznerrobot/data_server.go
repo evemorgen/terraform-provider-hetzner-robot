@@ -279,7 +279,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*HetznerRobotClient)
+	client := meta.(HetznerRobotClient)
 
 	servers, err := client.getServers(ctx)
 	if err != nil {
