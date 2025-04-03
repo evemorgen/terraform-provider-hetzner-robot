@@ -45,6 +45,10 @@ type HetznerRobotServerRenameRequestBody struct {
 	Name string `json:"server_name"`
 }
 
+type HetznerRobotServersResponse struct {
+	Servers []HetznerRobotServer `json:"server"`
+}
+
 func (c *HetznerRobotClient) getServer(ctx context.Context, serverNumber int) (*HetznerRobotServer, error) {
 	res, err := c.makeAPICall(ctx, "GET", fmt.Sprintf("%s/server/%d", c.url, serverNumber), nil, []int{http.StatusOK, http.StatusAccepted})
 	if err != nil {
@@ -56,4 +60,17 @@ func (c *HetznerRobotClient) getServer(ctx context.Context, serverNumber int) (*
 		return nil, err
 	}
 	return &serverResponse.Server, nil
+}
+
+func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServer, error) {
+	res, err := c.makeAPICall(ctx, "GET", fmt.Sprintf("%s/server", c.url), nil, []int{http.StatusOK, http.StatusAccepted})
+	if err != nil {
+		return nil, err
+	}
+
+	serversResponse := HetznerRobotServersResponse{}
+	if err = json.Unmarshal(res, &serversResponse); err != nil {
+		return nil, err
+	}
+	return serversResponse.Servers, nil
 }

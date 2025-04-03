@@ -32,13 +32,13 @@ description: |-
 Required:
 
 - `action` (String)
-- `dst_ip` (String)
-- `dst_port` (String)
-- `name` (String)
-- `src_ip` (String)
-- `src_port` (String)
 
 Optional:
 
+- `dst_ip` (String)
+- `dst_port` (String)
+- `name` (String)
 - `protocol` (String)
+- `src_ip` (String)
+- `src_port` (String)
 - `tcp_flags` (String)

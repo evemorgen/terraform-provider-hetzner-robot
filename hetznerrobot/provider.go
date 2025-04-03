@@ -2,6 +2,7 @@ package hetznerrobot
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -35,6 +36,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"hetzner-robot_boot":    dataBoot(),
 			"hetzner-robot_server":  dataServer(),
+			"hetzner-robot_servers": dataServers(),
 			"hetzner-robot_vswitch": dataVSwitch(),
 			"hetzner-robot_ssh_key": dataSshKey(),
 		},
