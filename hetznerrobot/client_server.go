@@ -71,33 +71,31 @@ func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServ
 	// Debug: Print raw response
 	fmt.Printf("Raw API response: %s\n", string(res))
 
-	// First unmarshal into a generic interface to see the structure
-	var rawResponse interface{}
-	if err = json.Unmarshal(res, &rawResponse); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal raw response: %w", err)
+	// Unmarshal into an array of server objects
+	var serverObjects []map[string]interface{}
+	if err = json.Unmarshal(res, &serverObjects); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal server objects: %w", err)
 	}
 
-	// Debug: Print the structure
-	fmt.Printf("Response structure: %+v\n", rawResponse)
-
-	// Try to convert the raw response to our server structs
-	var servers []HetznerRobotServer
-	switch v := rawResponse.(type) {
-	case []interface{}:
-		// If it's an array, try to convert each element
-		servers = make([]HetznerRobotServer, len(v))
-		for i, item := range v {
-			// Convert each item to JSON and then to our struct
-			itemBytes, err := json.Marshal(item)
-			if err != nil {
-				return nil, fmt.Errorf("failed to marshal server item: %w", err)
-			}
-			if err = json.Unmarshal(itemBytes, &servers[i]); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal server item: %w", err)
-			}
+	// Convert each server object to our server struct
+	servers := make([]HetznerRobotServer, len(serverObjects))
+	for i, obj := range serverObjects {
+		// Get the server data from the "server" field
+		serverData, ok := obj["server"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid server object structure at index %d", i)
 		}
-	default:
-		return nil, fmt.Errorf("unexpected response type: %T", v)
+
+		// Convert the server data to JSON
+		serverBytes, err := json.Marshal(serverData)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal server data: %w", err)
+		}
+
+		// Unmarshal into our server struct
+		if err = json.Unmarshal(serverBytes, &servers[i]); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal server data: %w", err)
+		}
 	}
 
 	// Debug: Print number of servers found and their details
