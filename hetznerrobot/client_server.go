@@ -71,17 +71,17 @@ func (c *HetznerRobotClient) getServers(ctx context.Context) ([]HetznerRobotServ
 	// Debug: Print raw response
 	fmt.Printf("Raw API response: %s\n", string(res))
 
-	// Unmarshal into the response struct
-	var response HetznerRobotServersResponse
-	if err = json.Unmarshal(res, &response); err != nil {
+	// Unmarshal directly into a slice of servers since the API returns an array
+	var servers []HetznerRobotServer
+	if err = json.Unmarshal(res, &servers); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal servers response: %w", err)
 	}
 
 	// Debug: Print number of servers found and their details
-	fmt.Printf("Number of servers found: %d\n", len(response.Server))
-	for i, server := range response.Server {
+	fmt.Printf("Number of servers found: %d\n", len(servers))
+	for i, server := range servers {
 		fmt.Printf("Server %d: %+v\n", i, server)
 	}
 
-	return response.Server, nil
+	return servers, nil
 }
