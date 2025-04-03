@@ -18,7 +18,7 @@ description: |-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `servers` (List of Object) List of servers (see [below for nested schema](#nestedatt--servers))
+- `servers` (List of Object) (see [below for nested schema](#nestedatt--servers))
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`
