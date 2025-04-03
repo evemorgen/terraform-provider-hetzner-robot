@@ -279,18 +279,30 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(HetznerRobotClient)
+	client := meta.(*HetznerRobotClient)
 
-	servers, err := c.getServers(ctx)
+	servers, err := client.getServers(ctx)
 	if err != nil {
-		return diag.Errorf("Unable to fetch servers:\n\t %q", err)
+		return diag.FromErr(err)
 	}
 
+	// Debug: Print number of servers being processed
 	fmt.Printf("Processing %d servers for Terraform state\n", len(servers))
 
 	serverList := make([]map[string]interface{}, len(servers))
 	for i, server := range servers {
-		fmt.Printf("Processing server %d: %s\n", server.ServerNumber, server.ServerName)
+		// Debug: Print details of each server being processed
+		fmt.Printf("Processing server %d: %+v\n", i, server)
+
+		// Convert subnets to the correct format
+		subnets := make([]map[string]interface{}, len(server.Subnets))
+		for j, subnet := range server.Subnets {
+			subnets[j] = map[string]interface{}{
+				"ip":   subnet.IP,
+				"mask": subnet.Mask,
+			}
+		}
+
 		serverMap := map[string]interface{}{
 			"server_number":     server.ServerNumber,
 			"server_name":       server.ServerName,
@@ -301,7 +313,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			"paid_until":        server.PaidUntil,
 			"product":           server.Product,
 			"ip_addresses":      server.IPs,
-			"server_subnets":    server.Subnets,
+			"server_subnets":    subnets,
 			"status":            server.Status,
 			"traffic":           server.Traffic,
 			"linked_storagebox": server.LinkedStoragebox,
@@ -317,17 +329,14 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		serverList[i] = serverMap
 	}
 
+	// Debug: Print number of servers being set in state
 	fmt.Printf("Setting %d servers in Terraform state\n", len(serverList))
+
 	if err := d.Set("servers", serverList); err != nil {
-		fmt.Printf("Error setting servers: %v\n", err)
-		return diag.Errorf("Error setting servers: %s", err)
+		return diag.FromErr(err)
 	}
 
-	// Set a static ID since this is a data source
 	d.SetId("servers")
 
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	return diags
+	return nil
 }
