@@ -14,61 +14,52 @@ func dataServers() *schema.Resource {
 		ReadContext: dataSourceServersRead,
 		Schema: map[string]*schema.Schema{
 			"servers": {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Description: "List of servers",
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"server_number": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "Server number",
+							Type:     schema.TypeInt,
+							Computed: true,
 						},
 						"server_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Server name",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"server_ip": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Server IP",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"server_ipv6": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Server IPv6 Net",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"datacenter": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Data center",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"is_cancelled": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Status of server cancellation",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"paid_until": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Paid until date",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"product": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Server product name",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"ip_addresses": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Description: "Array of assigned single IP addresses",
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"server_subnets": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Description: "Array of assigned subnets",
+							Type:     schema.TypeList,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"ip": {
@@ -83,59 +74,48 @@ func dataServers() *schema.Resource {
 							},
 						},
 						"status": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Server status (\"ready\" or \"in process\")",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"traffic": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Free traffic quota, 'unlimited' in case of unlimited traffic",
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"linked_storagebox": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "Linked Storage Box ID",
+							Type:     schema.TypeInt,
+							Computed: true,
 						},
 						"reset": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of reset system availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"rescue": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of Rescue System availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"vnc": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of VNC installation availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"windows": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of Windows installation availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"plesk": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of Plesk installation availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"cpanel": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of cPanel installation availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"wol": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of Wake On Lan availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"hot_swap": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Flag of Hot Swap availability",
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 					},
 				},
@@ -310,6 +290,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	serverList := make([]map[string]interface{}, len(servers))
 	for i, server := range servers {
+		fmt.Printf("Processing server %d: %s\n", server.ServerNumber, server.ServerName)
 		serverMap := map[string]interface{}{
 			"server_number":     server.ServerNumber,
 			"server_name":       server.ServerName,
@@ -338,6 +319,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	fmt.Printf("Setting %d servers in Terraform state\n", len(serverList))
 	if err := d.Set("servers", serverList); err != nil {
+		fmt.Printf("Error setting servers: %v\n", err)
 		return diag.Errorf("Error setting servers: %s", err)
 	}
 
